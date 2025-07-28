@@ -1,36 +1,25 @@
 import express, { Request, Response } from "express";
-import register from "../Controllers/User/register";
 import asyncHandler from "../Utils/asyncHandler";
-import login from "../Controllers/User/login";
 import userAuth from "../Middlewares/userAuth";
-import profile from "../Controllers/User/profile";
-import changePassword from "../Controllers/User/changePassword";
-import updateProfile from "../Controllers/User/updateProfile";
-import forgetPassword from "../Controllers/User/forgetPassword";
+import user from "../Controllers/user.controller";
 const router = express.Router();
 
-router.post("/register", asyncHandler(register));
-router.get("/login", asyncHandler(login));
-router.get("/profile", asyncHandler(userAuth), asyncHandler(profile));
+router.post("/register", asyncHandler(user.register));
+router.get("/login", asyncHandler(user.login));
+router.get("/profile", asyncHandler(userAuth), asyncHandler(user.profile));
 router.put(
   "/changepassword",
   asyncHandler(userAuth),
-  asyncHandler(changePassword)
+  asyncHandler(user.changePassword)
 );
 router.put(
   "/updateprofile",
   asyncHandler(userAuth),
-  asyncHandler(updateProfile)
+  asyncHandler(user.updateProfile)
 );
 
-router.get(
-  "/forgetpassword",
-  asyncHandler(forgetPassword.forgetPasswordMailSend)
-);
+router.get("/forgetpassword", asyncHandler(user.forgetPasswordMailSend));
 
-router.put(
-  "/forgetpasswordupdate",
-  asyncHandler(forgetPassword.forgetPasswordUpdate)
-);
+router.put("/forgetpasswordupdate", asyncHandler(user.forgetPasswordUpdate));
 
 export default router;
