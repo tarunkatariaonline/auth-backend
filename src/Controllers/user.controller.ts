@@ -4,10 +4,11 @@ import User from "../Schema/user.schema";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
-import { IUserReq } from "../Types/user.types";
+import { ILoginReq, IRegisterReq } from "../Types/user.types";
+import userService from "../Services/user.service";
 
 const register = async (req: Request, res: Response) => {
-  const { name, email, password, confirmPassword }: IUserReq = req.body;
+  const { name, email, password, confirmPassword } = req.body as IRegisterReq;
 
   if (!name || !email || !password || !confirmPassword) {
     throw new CustomError("Fill All Fields Properly !", 401);
@@ -17,52 +18,30 @@ const register = async (req: Request, res: Response) => {
     throw new CustomError("Passwords Do Not Match !", 401);
   }
 
-  const existUser = await User.findOne({ email });
-
-  if (existUser) {
-    throw new CustomError("Email Already Exist !", 401);
-  }
-
-  const hashedPassword = await bcrypt.hash(password, 12);
-  const user = await User.create({
+  const data = await userService.register({
     name,
     email,
-    password: hashedPassword,
+    password,
+    confirmPassword,
   });
 
-  const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
-  user.password = null;
   res.status(201).json({
     message: "Registered Successfully",
-    user: user,
-    token: token,
+    data: data,
   });
 };
 
 const login = async (req: Request, res: Response) => {
-  const { email, password } = req.body;
+  const { email, password } = req.body as ILoginReq;
 
   if (!email || !password) {
     throw new CustomError("Email and password are required !", 401);
   }
 
-  const user = await User.findOne({ email });
-
-  if (!user) {
-    throw new CustomError("User not found !", 404);
-  }
-
-  const isValidPassword = await bcrypt.compare(password, user.password);
-  if (!isValidPassword) {
-    throw new CustomError("Invalid password !", 401);
-  }
-
-  user.password = null;
-  const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
+  const data = await userService.login({ email, password });
   res.status(200).json({
     message: "Login successfully !",
-    user: user,
-    token,
+    data: data,
   });
 };
 
@@ -78,20 +57,14 @@ const updateProfile = async (req: Request, res: Response) => {
   if (!name || !email) {
     throw new CustomError("Fill All the Details !", 400);
   }
-  const user = await User.findByIdAndUpdate(
-    req.user._id,
-    {
-      name: name,
-      email: email,
-    },
-    {
-      new: true,
-    }
-  ).select("-password");
-
+  const data = await userService.updateProfile({
+    id: req.user._id,
+    name,
+    email,
+  });
   res.json({
     message: "Profile updated successfully",
-    user: user,
+    data: data,
   });
 };
 
@@ -104,7 +77,8 @@ const changePassword = async (req: Request, res: Response) => {
   if (newPassword !== confirmPassword) {
     throw new CustomError("Passwords do not match !", 401);
   }
-  let user = await User.findById(req.user._id);
+  const id = req.user._id;
+  let user = await User.findById(id);
   if (!user) {
     throw new CustomError("User Not Found !", 404);
   }
