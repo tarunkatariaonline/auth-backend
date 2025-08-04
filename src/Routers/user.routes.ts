@@ -9,17 +9,17 @@ router.post("/register", asyncHandler(user.register));
 router.get("/login", asyncHandler(user.login));
 router.get(
   "/profile",
-  asyncHandler(auth(ROLE.USER)),
+  asyncHandler(auth(ROLE.ALL)),
   asyncHandler(user.profile)
 );
 router.put(
   "/changepassword",
-  asyncHandler(auth(ROLE.USER)),
+  asyncHandler(auth(ROLE.ALL)),
   asyncHandler(user.changePassword)
 );
 router.put(
   "/updateprofile",
-  asyncHandler(auth(ROLE.USER)),
+  asyncHandler(auth(ROLE.ALL)),
   asyncHandler(user.updateProfile)
 );
 
