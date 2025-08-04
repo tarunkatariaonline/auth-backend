@@ -77,18 +77,10 @@ const changePassword = async (req: Request, res: Response) => {
   if (newPassword !== confirmPassword) {
     throw new CustomError("Passwords do not match !", 401);
   }
-  const id = req.user._id;
-  let user = await User.findById(id);
-  if (!user) {
-    throw new CustomError("User Not Found !", 404);
-  }
-  const isValidPassword = await bcrypt.compare(oldPassword, user.password);
-  if (!isValidPassword) {
-    throw new CustomError("Old Password is Incorrect !", 401);
-  }
 
-  user.password = await bcrypt.hash(newPassword, 12);
-  await User.findByIdAndUpdate(user._id, user);
+  const id = req.user._id;
+
+  await userService.changePassword({ id, oldPassword, newPassword });
 
   res.status(200).json({
     message: "Password changed successfully",

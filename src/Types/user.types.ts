@@ -10,10 +10,16 @@ interface ILoginReq {
   password: string;
 }
 
-interface IUpdateProfile {
+interface IUpdateProfileReq {
   id: string;
   name: string;
   email: string;
 }
 
-export { IRegisterReq, ILoginReq, IUpdateProfile };
+interface IChangePasswordReq {
+  id: string;
+  oldPassword: string;
+  newPassword: string;
+}
+
+export { IRegisterReq, ILoginReq, IUpdateProfileReq, IChangePasswordReq };

@@ -4,7 +4,12 @@ import User from "../Schema/user.schema";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
-import { ILoginReq, IRegisterReq, IUpdateProfile } from "../Types/user.types";
+import {
+  IChangePasswordReq,
+  ILoginReq,
+  IRegisterReq,
+  IUpdateProfileReq,
+} from "../Types/user.types";
 
 const register = async ({
   name,
@@ -59,7 +64,7 @@ const updateProfile = async ({
   id,
   name,
   email,
-}: IUpdateProfile): Promise<any> => {
+}: IUpdateProfileReq): Promise<any> => {
   const user = await User.findByIdAndUpdate(
     id,
     {
@@ -75,4 +80,22 @@ const updateProfile = async ({
   };
   return data;
 };
-export default { register, login, updateProfile };
+
+const changePassword = async ({
+  id,
+  oldPassword,
+  newPassword,
+}: IChangePasswordReq): Promise<any> => {
+  let user = await User.findById(id);
+  if (!user) {
+    throw new CustomError("User Not Found !", 404);
+  }
+  const isValidPassword = await bcrypt.compare(oldPassword, user.password);
+  if (!isValidPassword) {
+    throw new CustomError("Old Password is Incorrect !", 401);
+  }
+
+  user.password = await bcrypt.hash(newPassword, 12);
+  await User.findByIdAndUpdate(user._id, user);
+};
+export default { register, login, updateProfile, changePassword };
