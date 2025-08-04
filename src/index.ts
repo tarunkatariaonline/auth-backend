@@ -1,8 +1,8 @@
-import express, { NextFunction, Request, Response } from "express";
-import "./Config/db.config";
+import express from "express";
+import "./Config/";
 import user from "./Routers/user.routes";
-import CustomError from "./Utils/CustomError";
 import bodyParser from "body-parser";
+import errorHandler from "./Middlewares/errorHandler.middleware";
 const app = express();
 import dotenv from "dotenv";
 dotenv.config();
@@ -13,14 +13,7 @@ const port = 3000;
 
 app.use("/api/v1/user", user);
 
-app.use(
-  "/",
-  (err: CustomError, req: Request, res: Response, next: NextFunction) => {
-    res.status(err.statusCode || 500).send({
-      message: err.message || "Server Error",
-    });
-  }
-);
+app.use("/", errorHandler);
 
 app.listen(port, () => {
   return console.log(`Express is listening at http://localhost:${port}`);
