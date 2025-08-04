@@ -1,5 +1,5 @@
 import express from "express";
-import "./Config/";
+import "./Config/db.config";
 import user from "./Routers/user.routes";
 import bodyParser from "body-parser";
 import errorHandler from "./Middlewares/errorHandler.middleware";
@@ -12,7 +12,6 @@ app.use(bodyParser.json());
 const port = 3000;
 
 app.use("/api/v1/user", user);
-
 app.use("/", errorHandler);
 
 app.listen(port, () => {
