@@ -13,7 +13,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const CustomError_1 = __importDefault(require("../Utils/CustomError"));
-const userSchema_1 = __importDefault(require("../Schema/userSchema"));
+const user_schema_1 = __importDefault(require("../Schema/user.schema"));
 const bcrypt_1 = __importDefault(require("bcrypt"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const crypto_1 = __importDefault(require("crypto"));
@@ -25,12 +25,12 @@ const register = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     if (password !== confirmPassword) {
         throw new CustomError_1.default("Passwords Do Not Match !", 401);
     }
-    const existUser = yield userSchema_1.default.findOne({ email });
+    const existUser = yield user_schema_1.default.findOne({ email });
     if (existUser) {
         throw new CustomError_1.default("Email Already Exist !", 401);
     }
     const hashedPassword = yield bcrypt_1.default.hash(password, 12);
-    const user = yield userSchema_1.default.create({
+    const user = yield user_schema_1.default.create({
         name,
         email,
         password: hashedPassword,
@@ -48,7 +48,7 @@ const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     if (!email || !password) {
         throw new CustomError_1.default("Email and password are required !", 401);
     }
-    const user = yield userSchema_1.default.findOne({ email });
+    const user = yield user_schema_1.default.findOne({ email });
     if (!user) {
         throw new CustomError_1.default("User not found !", 404);
     }
@@ -75,7 +75,7 @@ const updateProfile = (req, res) => __awaiter(void 0, void 0, void 0, function* 
     if (!name || !email) {
         throw new CustomError_1.default("Fill All the Details !", 400);
     }
-    const user = yield userSchema_1.default.findByIdAndUpdate(req.user._id, {
+    const user = yield user_schema_1.default.findByIdAndUpdate(req.user._id, {
         name: name,
         email: email,
     }, {
@@ -94,7 +94,7 @@ const changePassword = (req, res) => __awaiter(void 0, void 0, void 0, function*
     if (newPassword !== confirmPassword) {
         throw new CustomError_1.default("Passwords do not match !", 401);
     }
-    let user = yield userSchema_1.default.findById(req.user._id);
+    let user = yield user_schema_1.default.findById(req.user._id);
     if (!user) {
         throw new CustomError_1.default("User Not Found !", 404);
     }
@@ -103,14 +103,14 @@ const changePassword = (req, res) => __awaiter(void 0, void 0, void 0, function*
         throw new CustomError_1.default("Old Password is Incorrect !", 401);
     }
     user.password = yield bcrypt_1.default.hash(newPassword, 12);
-    yield userSchema_1.default.findByIdAndUpdate(user._id, user);
+    yield user_schema_1.default.findByIdAndUpdate(user._id, user);
     res.status(200).json({
         message: "Password changed successfully",
     });
 });
 const forgetPasswordMailSend = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { email } = req.body;
-    const user = yield userSchema_1.default.findOne({ email });
+    const user = yield user_schema_1.default.findOne({ email });
     if (!user) {
         throw new CustomError_1.default("User Doesn't Exist !", 403);
     }
@@ -147,7 +147,7 @@ const forgetPasswordUpdate = (req, res) => __awaiter(void 0, void 0, void 0, fun
         .createHash("sha256")
         .update(token)
         .digest("hex");
-    const user = yield userSchema_1.default.findOne({
+    const user = yield user_schema_1.default.findOne({
         resetPasswordToken: resetPasswordToken,
         resetPasswordTokenExpires: { $gt: Date.now() },
     });
